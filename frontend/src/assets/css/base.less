@@ -1,0 +1,246 @@
+@import "init.less";
+
+// INIT
+
+	*, ::after, ::before {
+	    box-sizing: border-box;
+	}
+
+	body{
+		padding: 0;
+		margin: 0;
+		background-color: @bg;
+		position: relative;
+
+		&:before{
+			content: '';
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			z-index: -2;
+
+			background-image: url(../img/bg_lines.png);
+			background-repeat: repeat;
+			mix-blend-mode: color-burn;
+			opacity: 0.5;
+		}
+	}
+
+	&::selection{
+		background-color: @red;
+		color: @white;
+	}
+
+	#app {
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow:hidden;
+		width: 100%;
+		min-height: 100vh;
+		height: 100%;
+		padding: 15px;
+		position: relative;
+
+		&:before{
+			content: '';
+			border: solid 3px @red;
+			border-radius: 5px;
+			user-select:none;
+			pointer-events:none;
+			position: absolute;
+			left: 12px;
+			top: 12px;
+			right: 12px;
+			bottom: 12px;
+		}
+	}
+
+	.app-content{
+		width: 85%;
+		max-width: 950px;
+
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+
+	header{
+		margin-bottom: 25px;
+		text-align: center;
+
+		svg{
+			width: 80%;
+			max-width: 250px;
+			height: auto;
+			fill:@white;
+			color: @green;
+		}
+
+		&.small{
+			margin-bottom: 15px;
+
+			svg{
+				width: 50%;
+				opacity: .75;
+			}
+		}
+	}
+
+
+	h2{
+		text-align: center;
+		.heebo(1.5rem, @green, 200);
+		letter-spacing: 1px;
+		line-height: 1.25;
+		margin-bottom: 20px;
+	}
+
+	hr{
+		display: block;
+		width: 33%;
+		border-color: @red;
+		margin: 30px auto;
+	}
+
+	button{
+		border:none;
+		cursor: pointer;
+		background-color: @green;
+		.heebo(1.3rem, @black, 400);
+		line-height: 1.25;
+		letter-spacing: -.5px;
+		border-radius: 3px;
+		display: block;
+		max-width: 80%;
+		margin: 0 auto;
+		padding: 5px 15px;
+		box-shadow:0 0 0 3px @green;
+		.transition(.35s);
+
+		&:hover{
+			background-color: @black;
+			color:@green;
+		}
+
+		&:active, &:focus{
+			outline: none;
+			border:none;
+		}
+	}
+
+	form input{
+		background: transparent;
+		display: block;
+		height: 50px;
+		width: 100%;
+
+		margin: 0 auto 12px;
+		padding: 3px 5px;
+
+		border-radius: 3px;
+		border: none;
+		border-bottom: 1px solid @white;
+
+		.heebo(1.35rem, @white, 400);
+		text-align: center;
+
+		.transition();
+
+		&::placeholder{
+			color: @greylight;
+			letter-spacing: 1px;
+			opacity: .5;
+		}
+
+		&:focus{
+			outline: none;
+			border-top: 1px solid @red;
+			border-color: @red;
+		}
+	}
+
+
+// VueJS Transition
+// ---------------
+	
+	// FADING > Video login
+		.fading-enter-active {
+			animation: fade-in 3s;
+		}
+		.fading-leave-active {
+			animation: fade-in 3s reverse;
+		}
+
+	// Fast Fade - copy link
+		.fade-fast-enter-active {
+			animation: fade-in 0.5s;
+		}
+		.fade-fast-leave-active {
+			animation: fade-in 2.5s reverse;
+		}
+
+		@keyframes fade-in {
+			from {
+				opacity: 0;
+			}
+			to{
+				opacity: 1;
+			}
+		}
+
+	// SQL FADE
+
+		.sql-fade-enter-from,
+		.sql-fade-leave-to{
+			opacity: 0;
+		}
+		.sql-fade-enter-to,
+		.sql-fade-leave-from{
+			opacity: 1;
+		}
+		.sql-fade-enter-active{
+			transition-delay: 0.5s;
+		}
+		.sql-fade-enter-active,
+		.sql-fade-leave-active {
+			.transition(1.5s);
+			transition-timing-function: cubic-bezier(0.000, 0.580, 0.250, 1.000);
+		}
+
+	// SQL Scoreboard Transition
+
+		.score-enter-from{
+			// opacity: 0;
+			// transform: rotate(-15deg) translate(-50%, -50%) translateZ(250px);
+			// background-color:green;
+		}
+		.score-leave-to{
+			// opacity: 0;
+			// transform: rotate(15deg) translate(-50%, -50%) translateZ(250px);
+			background-color:green;
+		}
+
+		.score-enter-to,
+		.score-leave-from{
+			// opacity: 1;
+			// transform: none;
+			background-color:green;
+		}
+
+		.score-enter-active{
+			// transition-delay: 0.5s;
+			background-color:green;
+		}
+		.score-enter-active,
+		.score-leave-active {
+			// .transition(0.75s);
+			// background-color:green;
+			// transition-timing-function: cubic-bezier(0.000, 0.580, 0.250, 1.000);
+		}

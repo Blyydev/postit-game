@@ -1,0 +1,67 @@
+// styles default
+
+// VARIABLES & FONTS & FUNCTIONS
+// -------
+
+	@black:#000;
+	@white:#fff;
+	@grey:#808080;
+		@greydark:darken(@grey, 30%);
+		@greylight:lighten(@grey, 30%);
+		@greywhite:lighten(@grey, 50%);
+
+	@bg: #000C13;
+
+	@purple:#814da6;
+		@purpledark:#653c82;
+		@purple_alt:#681ba6;
+
+	@green:#00ffbb;
+		@greendark:#00ae80;
+
+	@red:#DC143C;
+
+
+	@good:#00ed7b;
+	@bad:#c70348;
+	@alert:#eba102;
+
+
+
+	.transition(@t: 0.5s){
+		transition-duration: @t;
+		transition-property: all;
+		transition-timing-function: ease-out;
+	}
+
+
+	// 200 / 400 / 600
+	.heebo(@s:1rem, @c:@grey, @w:400){
+		font-family: 'Heebo', sans-serif;
+		font-size: @s;
+		color:@c;
+		font-weight:@w;	
+	}
+
+
+	.roboto(@s:1rem, @c:@purple){
+		font-family: 'Roboto Mono', monospace;
+		font-size: @s;
+		color:@c;
+		font-weight: 400;
+	}
+
+
+
+	@keyframes lds-ellipsis1 {
+		0% { transform: scale(0);  }
+		100% { transform: scale(1);  }
+	}
+	@keyframes lds-ellipsis3 {
+		0% { transform: scale(1); }
+		100% { transform: scale(0); }
+	}
+	@keyframes lds-ellipsis2 {
+		0% { transform: translate(0, 0); }
+		100% {  transform: translate(20px, 0); }
+	}

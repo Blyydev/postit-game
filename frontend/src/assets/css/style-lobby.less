@@ -1,0 +1,90 @@
+@import "init.less";
+
+// LOGIN
+
+#Lobby{
+	display: flex;
+	align-items:center;
+	justify-content: center;
+	flex-direction: column;
+}
+
+.room_code{
+	background: @greywhite;
+	padding: 8px 30px;
+	border-radius: 5px;
+
+	span{
+		user-select: none;
+		.heebo(1.25rem, @greydark, 200);
+	}
+
+	strong{
+		.roboto(1.5rem, @red);
+		font-weight: bold;
+		margin-left: 10px;
+		text-shadow: 0px 0px 3px #f3000085;
+	}
+}
+
+@bdW: 2px;
+
+.players_list{
+	width: 100%;
+	max-width: 250px;
+	margin: 30px auto;
+
+	.player_item{
+
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		width: 90%;
+		margin: auto;
+		margin-bottom: 10px;
+
+		position: relative;
+		padding: 5px;
+
+		background: @bg;
+		border: @bdW;
+		background-clip: padding-box;
+		border: solid @bdW transparent;
+
+		border-radius: 5px;
+
+		&:before {
+			content: '';
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+
+			z-index: -1;
+			margin: -@bdW;
+			border-radius: inherit;
+			background: linear-gradient(145deg, crimson, @purple);
+		}
+
+		.admin{
+			margin-top: -3px;
+			margin-right: 8px;
+			cursor: default;
+		}
+
+		.pseudo{
+			.heebo(1.25rem, @greylight, 400);
+		}
+
+		&:nth-child(even):before{
+			background: linear-gradient(145deg, @purple, crimson);
+		}
+
+	}
+}
+
+.admin_bloc{
+	width: 100%;
+}

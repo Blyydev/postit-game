@@ -1,0 +1,177 @@
+@import "init.less";
+
+
+// Game
+
+#Game{
+
+	width: 100%;
+
+	h4{
+		.heebo(1.5rem, @white, 400);
+		border-bottom: 1px solid @green;
+		text-align: center;
+		margin-top: 0px;
+		margin-bottom: 25px;
+	}
+
+
+	@bdW: 3px;
+
+	.postit_list{
+		width: 100%;
+		margin: 30px auto 60px;
+
+		display: flex;
+		align-items: stretch;
+		justify-content: center;
+		align-content: center;
+		flex-wrap: wrap;
+
+		.postit_item{
+			margin: 0 6px 12px;
+
+			position: relative;
+			padding: 5px;
+
+			background: @bg;
+			border: @bdW;
+			background-clip: padding-box;
+			border: solid @bdW transparent;
+
+			border-radius: 5px;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-around;
+			flex: 0 1 33.333%;
+
+			&:before {
+				content: '';
+				position: absolute;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 0;
+
+				z-index: -1;
+				margin: -@bdW;
+				border-radius: inherit;
+				background: linear-gradient(145deg, crimson, @purple);
+			}
+
+			div{
+				text-align: center;
+				display: block;
+
+				&.player_pseudo{
+					.heebo(1rem, @greylight, 200);
+					letter-spacing: 1.5px;
+				}
+
+				&.content{
+					.roboto(1.5rem, @white);
+					line-height: 1;
+					margin: 3px 0 5px;
+				}
+
+				&.by{
+					.heebo(.85rem, @red, 400);
+					font-style: italic;
+				}
+			}
+
+			&:nth-child(even):before{
+				background: linear-gradient(145deg, @purple, crimson);
+			}
+
+		}
+
+	}
+
+	.incoming{
+
+		.waiting_icon {
+			position: relative;
+			width: 50px;
+			height: 20px;
+			margin: 0 auto;
+
+			div {
+				position: absolute;
+				top: 0px;
+				width: 10px;
+				height: 10px;
+				border-radius: 50%;
+				background: @white;
+				animation-timing-function: cubic-bezier(0, 1, 1, 0);
+
+				&:nth-child(1) {
+					left: 0px;
+					animation: lds-ellipsis1 0.6s infinite;
+				}
+				&:nth-child(2) {
+					left: 0px;
+					animation: lds-ellipsis2 0.6s infinite;
+				}
+				&:nth-child(3) {
+					left: 20px;
+					animation: lds-ellipsis2 0.6s infinite;
+				}
+				&:nth-child(4) {
+					left: 40px;
+					animation: lds-ellipsis3 0.6s infinite;
+				}
+			}
+		}
+	}
+
+
+	button{
+		max-width: 320px;
+	}
+
+	.postit_form{
+		h3{
+			.heebo(1.5rem, @white, 400);
+			text-align: center;
+
+			strong{
+				color: @green;
+			}
+
+			&:before{
+				content: '>';
+				color: @red;
+				font-weight: 600;
+				margin-right: 10px;
+			}
+		}
+
+		form{
+			width: 100%;
+			max-width: 400px;
+			margin: 0 auto;
+
+			button{
+				margin-top: 15px;
+				width: 100%;
+			}
+		}
+	}
+
+}
+
+
+@media screen and (max-width: 875px){
+	.postit_list{
+		flex-direction: column;
+
+		.postit_item{
+			width: 80%;
+			flex: 0 1 100px;
+		}
+	}
+}
+
+
+

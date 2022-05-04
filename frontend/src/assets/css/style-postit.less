@@ -1,0 +1,34 @@
+@import "init.less";
+
+// Post-It form
+
+#PostIt{
+	width: 100%;
+
+	h3{
+		.heebo(1.5rem, @white, 400);
+		text-align: center;
+
+		strong{
+			color: @green;
+		}
+
+		&:before{
+			content: '>';
+			color: @red;
+			font-weight: 600;
+			margin-right: 10px;
+		}
+	}
+
+	form{
+		width: 100%;
+    	max-width: 400px;
+    	margin: 0 auto;
+
+    	button{
+    		margin-top: 15px;
+    		width: 100%;
+    	}
+	}
+}
