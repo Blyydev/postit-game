@@ -1,7 +1,9 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import Svg from './components/SvgIcon.vue'
+import { createApp } from "vue";
+import App from "./App.vue";
+import VueCookies from "vue-cookies";
 
-const app = createApp(App)
-app.component('Svg', Svg)
-app.mount('#app')
+import "./assets/css/base.less";
+
+const app = createApp(App);
+app.use(VueCookies, { expires: "30d" });
+app.mount("#app");

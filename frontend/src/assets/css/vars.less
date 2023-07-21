@@ -1,5 +1,7 @@
 // styles default
 
+@import (css) url('https://fonts.googleapis.com/css2?family=Heebo:wght@200;400;600&family=Roboto&display=swap');
+
 // VARIABLES & FONTS & FUNCTIONS
 // -------
 
@@ -26,14 +28,11 @@
 	@bad:#c70348;
 	@alert:#eba102;
 
-
-
 	.transition(@t: 0.5s){
 		transition-duration: @t;
 		transition-property: all;
 		transition-timing-function: ease-out;
 	}
-
 
 	// 200 / 400 / 600
 	.heebo(@s:1rem, @c:@grey, @w:400){
@@ -43,15 +42,12 @@
 		font-weight:@w;	
 	}
 
-
 	.roboto(@s:1rem, @c:@purple){
-		font-family: 'Roboto Mono', monospace;
+		font-family: 'Roboto', monospace;
 		font-size: @s;
 		color:@c;
 		font-weight: 400;
 	}
-
-
 
 	@keyframes lds-ellipsis1 {
 		0% { transform: scale(0);  }

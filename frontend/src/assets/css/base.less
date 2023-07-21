@@ -1,4 +1,4 @@
-@import "init.less";
+@import "vars.less";
 
 // INIT
 
@@ -61,45 +61,36 @@
 		}
 	}
 
-	.app-content{
-		width: 85%;
-		max-width: 950px;
-
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-	}
-
-	header{
-		margin-bottom: 25px;
-		text-align: center;
-
-		svg{
-			width: 80%;
-			max-width: 250px;
-			height: auto;
-			fill:@white;
-			color: @green;
-		}
-
-		&.small{
-			margin-bottom: 15px;
-
-			svg{
-				width: 50%;
-				opacity: .75;
-			}
-		}
-	}
-
-
 	h2{
 		text-align: center;
 		.heebo(1.5rem, @green, 200);
 		letter-spacing: 1px;
 		line-height: 1.25;
 		margin-bottom: 20px;
+	}
+
+	h3 {
+		.heebo(1.5rem, @white, 400);
+		text-align: center;
+
+		strong {
+			color: @green;
+		}
+
+		&:before {
+			content: ">";
+			color: @red;
+			font-weight: 600;
+			margin-right: 10px;
+		}
+	}
+
+	h4 {
+		.heebo(1.5rem, @white, 400);
+		border-bottom: 1px solid @green;
+		text-align: center;
+		margin-top: 0px;
+		margin-bottom: 25px;
 	}
 
 	hr{
@@ -125,13 +116,29 @@
 		.transition(.35s);
 
 		&:hover{
-			background-color: @black;
+			background-color: transparent;
 			color:@green;
 		}
 
 		&:active, &:focus{
 			outline: none;
 			border:none;
+		}
+
+		&.btn_secondary{
+			box-shadow: 0 0 0 2px @green;
+			background-color: transparent;
+			font-size: 1.1rem;
+			color: @green;
+
+			&:hover {
+				box-shadow: 0 0 0 4px @green;
+				color: @white;
+			}
+		}
+
+		& + &{
+			margin-top: 1.5rem;
 		}
 	}
 
@@ -166,81 +173,31 @@
 		}
 	}
 
+	.error{
+		display: block;
+		padding: 5px 0;
+		margin-bottom: 0.75rem;
+		.heebo(1.15rem, @red, 600);
+		text-align: center;
+	}
+
 
 // VueJS Transition
 // ---------------
-	
-	// FADING > Video login
-		.fading-enter-active {
-			animation: fade-in 3s;
-		}
-		.fading-leave-active {
-			animation: fade-in 3s reverse;
-		}
 
-	// Fast Fade - copy link
-		.fade-fast-enter-active {
-			animation: fade-in 0.5s;
-		}
-		.fade-fast-leave-active {
-			animation: fade-in 2.5s reverse;
-		}
-
-		@keyframes fade-in {
-			from {
-				opacity: 0;
-			}
-			to{
-				opacity: 1;
-			}
-		}
-
-	// SQL FADE
-
-		.sql-fade-enter-from,
-		.sql-fade-leave-to{
-			opacity: 0;
-		}
-		.sql-fade-enter-to,
-		.sql-fade-leave-from{
-			opacity: 1;
-		}
-		.sql-fade-enter-active{
-			transition-delay: 0.5s;
-		}
-		.sql-fade-enter-active,
-		.sql-fade-leave-active {
-			.transition(1.5s);
-			transition-timing-function: cubic-bezier(0.000, 0.580, 0.250, 1.000);
-		}
-
-	// SQL Scoreboard Transition
-
-		.score-enter-from{
-			// opacity: 0;
-			// transform: rotate(-15deg) translate(-50%, -50%) translateZ(250px);
-			// background-color:green;
-		}
-		.score-leave-to{
-			// opacity: 0;
-			// transform: rotate(15deg) translate(-50%, -50%) translateZ(250px);
-			background-color:green;
-		}
-
-		.score-enter-to,
-		.score-leave-from{
-			// opacity: 1;
-			// transform: none;
-			background-color:green;
-		}
-
-		.score-enter-active{
-			// transition-delay: 0.5s;
-			background-color:green;
-		}
-		.score-enter-active,
-		.score-leave-active {
-			// .transition(0.75s);
-			// background-color:green;
-			// transition-timing-function: cubic-bezier(0.000, 0.580, 0.250, 1.000);
-		}
+	.sql-fade-enter-from,
+	.sql-fade-leave-to{
+		opacity: 0;
+	}
+	.sql-fade-enter-to,
+	.sql-fade-leave-from{
+		opacity: 1;
+	}
+	.sql-fade-enter-active{
+		transition-delay: 0.35s;
+	}
+	.sql-fade-enter-active,
+	.sql-fade-leave-active {
+		.transition(0.35s);
+		transition-timing-function: cubic-bezier(0.000, 0.580, 0.250, 1.000);
+	}
