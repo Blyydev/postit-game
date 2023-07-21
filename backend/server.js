@@ -3,7 +3,6 @@
 require("dotenv").config({ path: __dirname + "/.env" });
 
 const express = require("express");
-let bodyParser = require("body-parser");
 const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
@@ -19,12 +18,8 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.use(express.static("dist"));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-
 app.get("/", function (req, res) {
-  res.sendFile(__dirname + "/dist/index.html");
+  res.send("Hello World!");
 });
 
 let gamesList = {};
@@ -33,7 +28,6 @@ function createRoom() {
   let test = false;
   let tmp = null;
   while (!test) {
-    // tmp = '/' + UTILITIES.randomCode(6)
     tmp = "/" + Math.floor(1000 + Math.random() * 9000);
     if (!(tmp in gamesList)) test = true;
   }
