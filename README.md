@@ -11,6 +11,7 @@ Play the classic Post-it game on mobile with your friends at party or with disco
 **Back**
 
 - PORT: int
+- FRONT_URL: string
 
 ---
 

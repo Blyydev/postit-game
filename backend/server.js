@@ -2,10 +2,17 @@
 
 require("dotenv").config({ path: __dirname + "/.env" });
 
+const originCors = process.env.FRONT_URL || "https://post-it.squalala.fr";
+
 const express = require("express");
 const app = express();
 const server = require("http").createServer(app);
-const io = require("socket.io")(server);
+const io = require("socket.io")(server, {
+  cors: {
+    origin: originCors,
+    methods: ["GET", "POST"],
+  },
+});
 
 const port = process.env.PORT || 3000;
 
@@ -14,7 +21,7 @@ const Privategame = require("./privategame.js");
 
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Origin", req.get("origin"));
+  res.header("Access-Control-Allow-Origin", originCors);
   next();
 });
 
