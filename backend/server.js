@@ -7,7 +7,7 @@ const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
 
-const PORT = process.env.SERVER_PORT || 8080;
+const port = process.env.PORT || 3000;
 
 // prive Game class
 const Privategame = require("./privategame.js");
@@ -129,6 +129,6 @@ io.of(/^\/[0-9]{4}/).on("connection", (socket) => {
 });
 
 // Listen the Server
-server.listen(PORT, () => {
-  console.log(`Post-it game BACKEND | listening on port ${PORT}`);
+server.listen(port, "0.0.0.0", () => {
+  console.log(`Post-it game BACKEND | listening on port ${port}`);
 });

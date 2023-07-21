@@ -10,7 +10,7 @@ Play the classic Post-it game on mobile with your friends at party or with disco
 
 **Back**
 
-- SERVER_PORT: int
+- PORT: int
 
 ---
 
