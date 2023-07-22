@@ -1,6 +1,6 @@
 @import "vars.less";
 
-// INIT
+// -- RESET & INIT
 
 	*, ::after, ::before {
 	    box-sizing: border-box;
@@ -43,6 +43,7 @@
 		overflow:hidden;
 		width: 100%;
 		min-height: 100vh;
+		min-height: 100dvh;
 		height: 100%;
 		padding: 15px;
 		position: relative;
@@ -60,6 +61,8 @@
 			bottom: 12px;
 		}
 	}
+
+// -- TITLES
 
 	h2{
 		text-align: center;
@@ -93,12 +96,7 @@
 		margin-bottom: 25px;
 	}
 
-	hr{
-		display: block;
-		width: 33%;
-		border-color: @red;
-		margin: 30px auto;
-	}
+// -- FORMS
 
 	button{
 		border:none;
@@ -181,9 +179,16 @@
 		text-align: center;
 	}
 
+// -- MISC
 
-// VueJS Transition
-// ---------------
+	hr {
+		display: block;
+		width: 33%;
+		border-color: @red;
+		margin: 30px auto;
+	}
+
+// -- VUEJS TRANSITIONS
 
 	.sql-fade-enter-from,
 	.sql-fade-leave-to{
