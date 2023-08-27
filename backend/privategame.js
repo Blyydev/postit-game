@@ -1,107 +1,104 @@
 class Privategame {
   constructor(roomid, admin, io) {
     this.io = io.of(roomid);
+
     // base Room
     this.roomId = roomid;
     this.admin = admin;
 
     // Players
-    this.PLAYERS = {
-      list: {},
-      disconnected: {},
-    };
+    this.PLAYERS = {};
 
     // Game
-    this.GAME = {
-      state: 0, // 0 _ Off - 1 _ On
-    };
+    this.gameStarted = false;
   }
 
   // PLAYERS --------------
 
   // Connexion
-  connection(pseudo, id) {
-    this.newPlayer(pseudo, id);
+  async connection(pseudo, id) {
+    const isPlayer = !this.gameStarted;
+
+    if (isPlayer) {
+      // Add new player
+      this.PLAYERS[id] = {
+        id: id,
+        pseudo: pseudo,
+        postit_content: null,
+        postit_author: null,
+        disconnect: false,
+      };
+    }
+
+    await this.io.to(id).emit("connected", isPlayer);
+    await this.syncData();
   }
 
-  // Add new Player in this ROOM
-  async newPlayer(pseudo, id) {
-    this.PLAYERS.list[id] = {
-      id: id,
-      pseudo: pseudo,
-      postit_content: null,
-      postit_author: null,
-    };
-    await this.updatePlayersList();
-    this.io.to(id).emit("connected", true);
-  }
-
-  // emit Updated list of Players
-  async updatePlayersList() {
-    return await new Promise((resolve) => {
-      this.io.to("players").emit("players_list", this.PLAYERS.list, this.admin);
-      resolve();
+  async syncData() {
+    this.io.to("players").emit("sync_data", {
+      players: this.PLAYERS,
+      admin: this.admin,
     });
   }
 
   // Disconnection
   async disconnect(id, keep = true) {
-    if (id in this.PLAYERS.list) {
-      if (keep) {
-        this.PLAYERS.disconnected[id] = this.PLAYERS.list[id];
-      } else {
-        if (this.GAME.state === 1) this.setPostItAuthor();
-      }
-      delete this.PLAYERS.list[id];
-      // Update info
-      await this.updatePlayersList();
+    if (!id in this.PLAYERS) return;
+
+    if (!this.gameStarted || !keep) {
+      delete this.PLAYERS[id];
+      if (this.admin === id) this.admin = Object.keys(this.PLAYERS)[0];
+      if (this.gameStarted) this.setPostItAuthor();
+    } else {
+      if (this.PLAYERS[id]) this.PLAYERS[id].disconnect = true;
     }
+
+    // Update info
+    await this.syncData();
   }
 
   // Reconnection
   async reconnection(socketId, previousId) {
-    this.PLAYERS.list[socketId] = this.PLAYERS.disconnected[previousId];
-    this.PLAYERS.list[socketId].id = socketId;
+    delete Object.assign(this.PLAYERS, {
+      [socketId]: this.PLAYERS[previousId],
+    })[previousId];
+
+    this.PLAYERS[socketId].id = socketId;
+    this.PLAYERS[socketId].disconnect = false;
 
     // Change AuthorId from Player with Post-It wrote by this player
-    let postItWrote = this.getPostItByAuthorId(previousId);
-    this.PLAYERS.list[postItWrote].postit_author = socketId;
+    const targetId = this.getPostItByAuthorId(previousId);
+    const targetPostit = this.PLAYERS[targetId].postit_content;
 
-    // remove in disconnect players list
-    delete this.PLAYERS.disconnected[previousId];
+    this.PLAYERS[targetId].postit_author = socketId;
 
-    setTimeout(async () => {
-      await this.updatePlayersList();
-    }, 550);
+    await this.syncData();
+
+    return { testReconnexion: true, needPostit: targetPostit === null };
   }
 
   // GAME --------------
 
   getPostItByAuthorId(id) {
-    for (let x in this.PLAYERS.list) {
-      if (this.PLAYERS.list[x].postit_author === id) return x;
+    for (let x in this.PLAYERS) {
+      if (this.PLAYERS[x].postit_author === id) return x;
     }
-  }
-
-  getAuthorByPlayerId(id) {
-    for (let x in this.PLAYERS.list) {
-      if (x === id) return this.PLAYERS.list[x].postit_author;
-    }
+    return false;
   }
 
   // ---- ///
 
   setPostItAuthor() {
     let tmpAuthors = [];
-    for (let x in this.PLAYERS.list) tmpAuthors.push(x);
+    for (let x in this.PLAYERS) tmpAuthors.push(x);
 
     let idxAuthor = 0;
-    for (let y in this.PLAYERS.list) {
+    for (let y in this.PLAYERS) {
       idxAuthor++;
       if (idxAuthor >= tmpAuthors.length) {
-        this.PLAYERS.list[y].postit_author = tmpAuthors[0];
+        this.PLAYERS[y].postit_author = tmpAuthors[0];
       } else {
-        this.PLAYERS.list[y].postit_author = tmpAuthors[idxAuthor];
+        this.PLAYERS[y].postit_author = tmpAuthors[idxAuthor];
       }
     }
   }
@@ -110,12 +107,12 @@ class Privategame {
     if (socketId != this.admin) return false;
 
     // set State
-    this.GAME.state = 1;
+    this.gameStarted = true;
 
     this.setPostItAuthor();
 
     // send Data
-    this.updatePlayersList();
+    this.syncData();
 
     // Emit START GAME to ALL Players
     this.io.to("players").emit("startGame");
@@ -123,27 +120,22 @@ class Privategame {
 
   setPostIt(authorId, content) {
     let postItPlayer = null;
-    for (let x in this.PLAYERS.list) {
-      if (this.PLAYERS.list[x].postit_author === authorId) {
+    for (let x in this.PLAYERS) {
+      if (this.PLAYERS[x].postit_author === authorId) {
         postItPlayer = x;
       }
     }
 
-    this.PLAYERS.list[postItPlayer].postit_content = content;
-    this.updatePlayersList();
-  }
-
-  newPostIt(playerId) {
-    let authorId = this.getAuthorByPlayerId(playerId);
-    this.io.to(authorId).emit("newPostIt", true);
+    this.PLAYERS[postItPlayer].postit_content = content;
+    this.syncData();
   }
 
   // End
 
   testDestroy() {
     if (
-      Object.keys(this.PLAYERS.list).length === 0 &&
-      this.PLAYERS.list.constructor === Object
+      Object.keys(this.PLAYERS).length === 0 &&
+      this.PLAYERS.constructor === Object
     ) {
       return true;
     } else {

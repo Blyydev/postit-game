@@ -3,7 +3,7 @@ import { computed } from "vue";
 import { useWebsocket } from "@/composable/useWebsocket.js";
 import Logo from "@/components/parts/Logo.vue";
 
-const currentView = useWebsocket();
+const { currentView, displayRoomCode, reconnect } = useWebsocket();
 
 const headerClass = computed(() => {
   if (currentView.value && currentView.value.component.__name === "Game")
@@ -19,8 +19,14 @@ const headerClass = computed(() => {
       <Logo />
     </header>
 
+    <div class="party_code" v-if="displayRoomCode">{{ displayRoomCode }}</div>
+
+    <div class="reconnect_loading" v-if="reconnect">
+      <h2>CHARGEMENT</h2>
+    </div>
+
     <component
-      v-if="currentView"
+      v-else-if="currentView"
       :is="currentView.component"
       v-bind="currentView.props"
       v-on="currentView.events"
@@ -64,5 +70,16 @@ header {
       opacity: 0.75;
     }
   }
+}
+
+.party_code {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: @red;
+  padding: 0.25rem 0.5rem;
+  border-bottom-left-radius: 5px;
+  .heebo(1rem, @white);
+  text-shadow: 0 0 8px darken(@red, 25%);
 }
 </style>

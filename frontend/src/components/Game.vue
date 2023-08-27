@@ -1,10 +1,11 @@
 <script setup>
-import { ref } from "vue";
+import { computed, ref, watch } from "vue";
 
 import PostitItem from "@/components/parts/PostitItem.vue";
 
-const props = defineProps(["socket", "players"]);
-const post_it = ref("");
+const props = defineProps(["socket", "players", "visitor"]);
+
+const playersCopy = ref(props.players);
 
 const quitGame = () => {
   if (confirm("Voulez-vous vraiment quitter la partie ?")) {
@@ -14,30 +15,53 @@ const quitGame = () => {
 };
 
 const postItFound = () => {
-  if (confirm("Voulez-vous un nouveau post-it ?")) {
-    props.socket.emit("changeMyPostIt", post_it.value);
+  if (confirm(`Voulez-vous changer le post-it de ${targetPseudo.value} ?`)) {
+    emit("changePostit");
   }
 };
 
-const emit = defineEmits(["backHome"]);
+const targetPseudo = computed(() => {
+  for (const key in playersCopy.value) {
+    if (props.players[key].postit_author === props.socket.id)
+      return props.players[key].pseudo;
+  }
+  return null;
+});
+
+const isManyPostit = computed(() => {
+  return Object.values(playersCopy.value).length > 5;
+});
+
+const emit = defineEmits(["backHome", "changePostit"]);
+
+watch(
+  () => props.players,
+  (newPlayers) => {
+    playersCopy.value = newPlayers;
+  }
+);
 </script>
 
 <template>
-  <div class="postit_list">
+  <div class="postit_list" :class="{ many_items: isManyPostit }">
     <PostitItem
-      v-for="(player, playerID) in players"
-      :pseudo="player.pseudo"
-      :content="player.postit_content"
+      v-for="(player, playerID) in playersCopy"
+      :key="playerID"
+      :postit="player"
       :by="players[player.postit_author]?.pseudo"
       :isMe="playerID === props.socket.id"
     />
   </div>
 
-  <button @click.prevent="postItFound">Vous avez trouvé votre post-it ?</button>
-  <hr />
-  <button @click.prevent="quitGame" class="btn_secondary">
-    Quitter la partie
-  </button>
+  <template v-if="!visitor">
+    <button @click.prevent="postItFound">
+      <strong>{{ targetPseudo }}</strong> a trouvé votre post-it ?
+    </button>
+    <hr />
+    <button @click.prevent="quitGame" class="btn_secondary">
+      Quitter la partie
+    </button>
+  </template>
 </template>
 
 <style lang="less" scoped>
@@ -52,15 +76,14 @@ const emit = defineEmits(["backHome"]);
   justify-content: center;
   align-content: center;
   flex-wrap: wrap;
+  flex-direction: column;
+
+  &.many_items {
+    flex-direction: row;
+  }
 }
 
 button {
   max-width: 320px;
-}
-
-@media screen and (max-width: 875px) {
-  .postit_list {
-    flex-direction: column;
-  }
 }
 </style>

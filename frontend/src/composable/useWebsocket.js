@@ -20,6 +20,7 @@ export function useWebsocket() {
 
   const socket = ref(null);
   const logged = ref(false);
+  const visitor = ref(false);
   const reconnect = ref(false);
   const state = ref(gameState.Home);
   const players = ref({});
@@ -63,9 +64,11 @@ export function useWebsocket() {
           props: {
             players: players.value,
             socket: socket.value,
+            visitor: visitor.value,
           },
           events: {
             backHome: backHome,
+            changePostit: changePostit,
           },
         };
       }
@@ -84,7 +87,6 @@ export function useWebsocket() {
         return {
           component: Home,
           props: {
-            tryreconnect: reconnect.value,
             socket: socket.value,
           },
           events: {},
@@ -95,28 +97,11 @@ export function useWebsocket() {
 
   const connectSocket = async () => {
     return await new Promise((resolve) => {
-      let options;
-      // ~ DEV
-      if (import.meta.env.MODE === "development") {
-        options = {
-          "force new connection": true,
-          reconnectionAttempts: "Infinity",
-          timeout: 10000,
-          transports: ["websocket"],
-        };
-      } else {
-        options = {
-          forceNew: true,
-          reconnection: true,
-          reconnectionDelay: 500,
-          reconnectionDelayMax: 5000,
-          reconnectionAttempts: 99999,
-        };
-      }
-
       socket.value = io.connect(
         `${import.meta.env.VITE_WEBSOCKET_URL}${roomId.value}`,
-        options
+        {
+          transports: ["websocket"], // check for prod !?
+        }
       );
 
       socket.value.on("connect", () => {
@@ -127,21 +112,33 @@ export function useWebsocket() {
 
   const setSockets = async () => {
     return await new Promise((resolve) => {
-      if (roomId.value == "/") {
-        // Joined a new Room
-        socket.value.on("roomJoined", (nspc) => {
-          joiningRoom(nspc);
-        });
-      } else {
+      socket.value.on("sync_data", (data) => {
+        players.value = data.players;
+        admin.value = data.admin;
+      });
+
+      socket.value.on("roomJoined", (nspc) => {
+        joiningRoom(nspc);
+      });
+
+      if (roomId.value !== "/") {
         // Player connection
-        socket.value.on("connected", (realPlayer) => {
-          if (realPlayer) {
-            let cookieV = socket.value.id + "___" + socket.value.nsp;
-            // createCookie("sql_postit", cookieV, 1);
-            $cookies.set(Cookie_name, cookieV, "3d");
+        socket.value.on("connected", (isPlayer) => {
+          if (isPlayer) {
+            $cookies.set(
+              Cookie_name,
+              `${socket.value.id}___${socket.value.nsp}`,
+              "3d"
+            );
+          } else {
+            visitor.value = true;
           }
+
           logged.value = true;
-          if (state.value === gameState.Home) state.value = gameState.Lobby;
+
+          if (state.value === gameState.Home && isPlayer)
+            state.value = gameState.Lobby;
+          else state.value = gameState.Game;
         });
 
         // Game is starting
@@ -154,54 +151,43 @@ export function useWebsocket() {
           players.value = playersData;
           admin.value = adminId;
         });
-
-        socket.value.on("newPostIt", (test) => {
-          if (!test) return false;
-          state.value = gameState.PostIt;
-        });
       }
-
-      // custom RECONNECTION
-      socket.value.on("reconnect_player", (test, namespace, oldId) => {
-        $cookies.remove(Cookie_name);
-        reconnect.value = false;
-
-        if (test) {
-          return reconnectingToRoom(namespace, oldId);
-        } else {
-          console.log("reconnection FAILED");
-        }
-      });
 
       resolve();
     });
   };
 
-  const reconnectingToRoom = async (namespace, oldId) => {
-    roomId.value = namespace;
-    logged.value = true;
+  const reconnectingToRoom = async (cookie) => {
+    const cookieData = cookie.split("___");
+    const oldSocketId = cookieData[0];
+    const oldSpace = cookieData[1];
 
-    await connectSocket();
-    await setSockets();
+    await joiningRoom(oldSpace);
 
-    let newCookie = socket.value.id + "___" + namespace;
-    $cookies.set(Cookie_name, newCookie, "3d");
+    socket.value.emit(
+      "reconnectionToRoom",
+      oldSocketId,
+      (test, dataPlayers, needPostit, deleteCookie) => {
+        reconnect.value = false;
 
-    socket.value.emit("reconnectionToRoom", oldId, (res) => {
-      if (res.state == gameState.Lobby) {
-        if (res.postIt === null) {
-          state.value = gameState.PostIt;
-        } else {
-          state.value = gameState.Game;
+        if (!test) {
+          console.log("Post-it game | Reconnection Failed !");
+          backHome(deleteCookie);
+          return;
         }
-      } else {
-        state.value = gameState.Lobby;
+
+        state.value = needPostit ? gameState.PostIt : gameState.Game;
+        roomId.value = oldSpace;
+        players.value = dataPlayers;
+        logged.value = true;
+
+        $cookies.set(Cookie_name, `${socket.value.id}___${oldSpace}`, "3d");
       }
-    });
+    );
   };
 
   const joiningRoom = async (nspc) => {
-    roomId.value = nspc;
+    if (nspc) roomId.value = nspc;
     await connectSocket();
     await setSockets();
   };
@@ -212,26 +198,40 @@ export function useWebsocket() {
     state.value = gameState.Game;
   };
 
-  const backHome = () => {
+  const backHome = (deleteCookie = true) => {
     joiningRoom("/");
     logged.value = false;
     state.value = gameState.Home;
 
-    $cookies.remove(Cookie_name);
+    if (deleteCookie) $cookies.remove(Cookie_name);
+  };
+
+  const changePostit = () => {
+    if (state.value === gameState.Game) state.value = gameState.PostIt;
   };
 
   onMounted(async () => {
-    await connectSocket();
-    await setSockets();
-
     // Check Cookie for Reconnection
     let cookieUser = $cookies.get(Cookie_name);
-    if (cookieUser != null) {
-      console.log("Trying to reconnect...");
+    if (cookieUser !== null) {
+      console.log("Post-it game | Trying to reconnect...");
       reconnect.value = true;
-      socket.value.emit("customReconnect", cookieUser);
+
+      reconnectingToRoom(cookieUser);
+    } else {
+      joiningRoom();
     }
   });
 
-  return currentView;
+  const displayRoomCode = computed(() => {
+    if (state.value === gameState.Game) return roomId.value.replace("/", "");
+    return false;
+  });
+
+  return {
+    currentView,
+    displayRoomCode,
+    reconnect,
+    visitor,
+  };
 }

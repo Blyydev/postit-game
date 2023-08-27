@@ -2,7 +2,7 @@
 import { ref } from "vue";
 
 const roomCode = ref("");
-const props = defineProps(["tryreconnect", "socket"]);
+const props = defineProps(["socket"]);
 
 const createRoom = () => {
   props.socket.emit("createRoom");
@@ -20,7 +20,7 @@ const digitOnly = (e) => {
 </script>
 
 <template>
-  <div v-if="!tryreconnect">
+  <div>
     <form v-on:submit.prevent="joinRoom" class="join_room">
       <input
         ref="roomCodeInput"
@@ -40,10 +40,6 @@ const digitOnly = (e) => {
     <div>
       <button @click.prevent="createRoom">Créer une partie</button>
     </div>
-  </div>
-
-  <div class="reconnect_loading" v-else>
-    <h2>CHARGEMENT</h2>
   </div>
 </template>
 

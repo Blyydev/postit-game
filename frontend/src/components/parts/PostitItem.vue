@@ -1,17 +1,17 @@
 <script setup>
-const props = defineProps(["pseudo", "content", "by", "isMe"]);
+const props = defineProps(["postit", "by", "isMe"]);
 </script>
 
 <template>
-  <div class="postit_item" :class="{ me: props.isMe }">
-    <div class="player_pseudo">{{ props.pseudo }}</div>
+  <div class="postit_item" :class="{ me: isMe, off: postit.disconnect }">
+    <div class="player_pseudo">{{ postit.pseudo }}</div>
 
-    <template v-if="props.content">
+    <template v-if="postit.postit_content">
       <div class="content">
-        <template v-if="!props.isMe">{{ props.content }}</template>
+        <template v-if="!isMe">{{ postit.postit_content }}</template>
       </div>
       <div class="by">
-        Fait par <strong>{{ props.by }}</strong>
+        Fait par <strong>{{ by }}</strong>
       </div>
     </template>
 
@@ -44,7 +44,11 @@ const props = defineProps(["pseudo", "content", "by", "isMe"]);
   display: flex;
   flex-direction: column;
   justify-content: space-around;
-  flex: 0 1 33.333%;
+
+  flex: 1;
+  min-width: 150px;
+  min-height: 90px;
+  width: 100%;
 
   &:before {
     content: "";
@@ -98,6 +102,11 @@ const props = defineProps(["pseudo", "content", "by", "isMe"]);
       content: "???";
     }
   }
+
+  &.off:before,
+  &.off > * {
+    opacity: 0.5;
+  }
 }
 
 .incoming {
@@ -133,13 +142,6 @@ const props = defineProps(["pseudo", "content", "by", "isMe"]);
         animation: lds-ellipsis3 0.6s infinite;
       }
     }
-  }
-}
-
-@media screen and (max-width: 875px) {
-  .postit_item {
-    width: 80%;
-    flex: 0 1 100px;
   }
 }
 </style>

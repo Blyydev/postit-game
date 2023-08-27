@@ -42,7 +42,22 @@ function createRoom() {
 }
 
 // Default namespace -> when create new game
+
 io.on("connection", (socket) => {
+  socket.on("createRoom", () => {
+    let newNspc = createRoom();
+    socket.emit("roomJoined", newNspc);
+  });
+
+  socket.on("joinRoom", (roomId) => {
+    let tmpNamespace = "/" + roomId;
+    if (tmpNamespace in gamesList) socket.emit("roomJoined", tmpNamespace);
+  });
+});
+
+io.of(/^\/[0-9]{4}/).on("connection", (socket) => {
+  const namespace = socket.nsp.name;
+
   socket.on("createRoom", () => {
     let newNspc = createRoom();
     socket.emit("roomJoined", newNspc);
@@ -54,25 +69,6 @@ io.on("connection", (socket) => {
       socket.emit("roomJoined", tmpNamespace);
     }
   });
-
-  socket.on("customReconnect", (cookie) => {
-    let tmpCookie = cookie.split("___");
-    let userSCKT = tmpCookie[0];
-    let roomNSP = tmpCookie[1];
-
-    if (
-      roomNSP in gamesList &&
-      userSCKT in gamesList[roomNSP].PLAYERS.disconnected
-    ) {
-      socket.emit("reconnect_player", true, roomNSP, userSCKT);
-    } else {
-      socket.emit("reconnect_player", false);
-    }
-  });
-});
-
-io.of(/^\/[0-9]{4}/).on("connection", (socket) => {
-  const namespace = socket.nsp.name;
 
   // Connexion
   socket.on("connectionRoom", (pseudo) => {
@@ -89,13 +85,22 @@ io.of(/^\/[0-9]{4}/).on("connection", (socket) => {
 
   // Player RECONNECTION
   socket.on("reconnectionToRoom", async (oldSocket, fn) => {
-    socket.join("players");
-    await gamesList[namespace].reconnection(socket.id, oldSocket);
-    let postItWrote = gamesList[namespace].getPostItByAuthorId(socket.id);
-    fn({
-      state: gamesList[namespace].GAME.state,
-      postIt: gamesList[namespace].PLAYERS.list[postItWrote].postit_content,
-    });
+    if (
+      namespace in gamesList &&
+      oldSocket in gamesList[namespace].PLAYERS &&
+      gamesList[namespace].gameStarted &&
+      gamesList[namespace].PLAYERS[oldSocket].disconnect
+    ) {
+      socket.join("players");
+
+      const { testReconnexion, needPostit } = await gamesList[
+        namespace
+      ].reconnection(socket.id, oldSocket);
+
+      fn(testReconnexion, gamesList[namespace].PLAYERS, needPostit, false);
+    } else {
+      fn(false, null, false, !namespace in gamesList);
+    }
   });
 
   // LOBBY
@@ -106,10 +111,6 @@ io.of(/^\/[0-9]{4}/).on("connection", (socket) => {
   // Game ACTIONS
   socket.on("setPostIt", (postItContent) => {
     gamesList[namespace].setPostIt(socket.id, postItContent);
-  });
-
-  socket.on("changeMyPostIt", () => {
-    gamesList[namespace].newPostIt(socket.id);
   });
 
   // Quitter la partie
@@ -130,7 +131,9 @@ io.of(/^\/[0-9]{4}/).on("connection", (socket) => {
       // Remove player
       gamesList[namespace].disconnect(socket.id);
       // if no more player : delete this room
-      if (gamesList[namespace].testDestroy()) delete gamesList[namespace];
+      if (gamesList[namespace].testDestroy()) {
+        delete gamesList[namespace];
+      }
     }
   });
 });
