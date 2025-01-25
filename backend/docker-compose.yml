@@ -1,0 +1,11 @@
+services:
+  postit-backend:
+    build:
+      context: .
+    container_name: post-it-game
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: ["npm", "start"]
